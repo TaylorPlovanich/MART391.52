@@ -99,7 +99,7 @@ const bodyKeywords = [
   "skinny"
 ];
 
-// Positive / “doing okay” path
+// Positive / “doing okay” words/phrases (used inside isPositiveMood)
 const positiveKeywords = [
   "good",
   "great",
@@ -150,6 +150,58 @@ const positiveResponses = [
   "It sounds like a lot of things are going well overall. That’s really good to notice."
 ];
 
+// --- Positive mood detector (improved) ---
+
+function isPositiveMood(lower) {
+  // Phrases that should *not* be treated as positive, even if they contain positive words
+  const negativePatterns = [
+    "not good",
+    "not great",
+    "not okay",
+    "not ok",
+    "not fine",
+    "not happy",
+    "not excited",
+    "not better",
+    "not doing well",
+    "not feeling well",
+    "tired of everything",
+    "everything sucks",
+    "everything is terrible",
+    "everything is awful",
+    "everything is falling apart"
+  ];
+  if (negativePatterns.some((p) => lower.includes(p))) {
+    return false;
+  }
+
+  // Clear positive phrases
+  const positivePhrases = [
+    "doing well",
+    "feeling well",
+    "feeling good",
+    "feeling great",
+    "pretty good",
+    "all good",
+    "everything is good",
+    "everything's good",
+    "things are good",
+    "things are going well",
+    "i'm doing well",
+    "im doing well"
+  ];
+  if (positivePhrases.some((p) => lower.includes(p))) {
+    return true;
+  }
+
+  // Fallback: positive words, matched as whole words
+  return positiveKeywords.some((word) => {
+    const escaped = word.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const wordRegex = new RegExp("\\b" + escaped + "\\b");
+    return wordRegex.test(lower);
+  });
+}
+
 // --- Crisis response text ---
 
 function getCrisisResponse() {
@@ -173,8 +225,8 @@ function buildSupportiveResponse(text) {
   const lower = text.toLowerCase();
   let responseParts = [];
 
-  // ✅ Positive path (e.g., "I'm feeling great", "everything", "all good")
-  if (positiveKeywords.some((k) => lower.includes(k))) {
+  // ✅ Positive path (e.g., "I'm feeling great", "I'm doing well", "everything is good")
+  if (isPositiveMood(lower)) {
     responseParts.push(randomFromArray(positiveResponses));
     responseParts.push(
       "If you feel like sharing, what’s something that’s been going well for you lately, or something you’re looking forward to?"
