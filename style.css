@@ -1,0 +1,265 @@
+/* Base reset-ish */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #f4f5f8;
+  color: #1f2933;
+  line-height: 1.5;
+}
+
+/* Layout */
+
+.app-header {
+  padding: 1.5rem 1.75rem;
+  background: #ffffff;
+  border-bottom: 1px solid #d0d7e2;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #6b7380;
+}
+
+.app-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Info panel */
+
+.info-panel {
+  flex: 1 1 280px;
+  min-width: 260px;
+  max-width: 360px;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.info-panel h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-panel h3 {
+  font-size: 1.05rem;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.info-panel p {
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+}
+
+.info-panel ul {
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-panel li {
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.disclaimer {
+  background: #fff7e5;
+  border-left: 4px solid #f59e0b;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+/* Chat panel */
+
+.chat-panel {
+  flex: 2 1 380px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  max-height: 720px;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.chat-window {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  background: #f7f8fb;
+}
+
+/* Custom scrollbar */
+.chat-window::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-window::-webkit-scrollbar-thumb {
+  background: #cbd2e1;
+  border-radius: 999px;
+}
+
+/* Messages */
+
+.message {
+  margin-bottom: 0.75rem;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-meta {
+  font-size: 0.75rem;
+  margin-bottom: 0.15rem;
+  color: #8a93a5;
+}
+
+.message-bubble {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+}
+
+/* User vs assistant */
+
+.message.user {
+  align-items: flex-end;
+}
+
+.message.user .message-bubble {
+  background: #2563eb;
+  color: #ffffff;
+  border-bottom-right-radius: 0.2rem;
+}
+
+.message.user .message-meta {
+  text-align: right;
+}
+
+.message.assistant {
+  align-items: flex-start;
+}
+
+.message.assistant .message-bubble {
+  background: #e5f3ff;
+  color: #102a43;
+  border-bottom-left-radius: 0.2rem;
+}
+
+/* Chat form */
+
+.chat-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.chat-form input[type="text"] {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #cbd2e1;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.chat-form input[type="text"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.chat-form button {
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 500;
+  transition: transform 0.05s ease, box-shadow 0.1s ease, background 0.1s ease;
+}
+
+.chat-form button:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.chat-form button:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+/* Footnote */
+
+.footnote {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7380;
+}
+
+/* Footer */
+
+.app-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #8a93a5;
+  padding: 0.75rem 1rem 1.25rem;
+}
+
+/* Accessibility helpers */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Small screens */
+
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column;
+  }
+
+  .chat-panel {
+    height: 65vh;
+  }
+}
