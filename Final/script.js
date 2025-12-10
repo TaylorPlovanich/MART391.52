@@ -1,7 +1,7 @@
 // Simple, rule-based "AI" for the Wellness Companion prototype.
 // No external APIs. No network requests. Just templates + logic.
 
-// --- Helper: add messages to the chat window ---
+// --- DOM references and helpers ---
 
 const chatWindow = document.getElementById("chat-window");
 const chatForm = document.getElementById("chat-form");
@@ -26,7 +26,7 @@ function addMessage(role, text) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// --- Core "AI" logic ---
+// --- Keyword groups ---
 
 // Crisis keywords to watch for (very simple)
 const crisisKeywords = [
@@ -34,16 +34,16 @@ const crisisKeywords = [
   "kill myself",
   "end my life",
   "can't go on",
-  "hurt myself",
+  "cant go on",
   "hurt myself",
   "self harm",
   "self-harm",
   "die",
+  "dying",
   "ending it",
   "ending everything"
 ];
 
-// Some mood and topic keywords
 const anxietyKeywords = [
   "anxious",
   "anxiety",
@@ -71,7 +71,9 @@ const schoolKeywords = [
   "homework",
   "grades",
   "deadline",
-  "project"
+  "project",
+  "exam",
+  "test"
 ];
 
 const relationshipKeywords = [
@@ -79,9 +81,12 @@ const relationshipKeywords = [
   "friends",
   "relationship",
   "partner",
+  "boyfriend",
+  "girlfriend",
   "family",
   "mom",
-  "dad"
+  "dad",
+  "parents"
 ];
 
 const bodyKeywords = [
@@ -89,10 +94,28 @@ const bodyKeywords = [
   "weight",
   "appearance",
   "look",
-  "ugly"
+  "ugly",
+  "fat",
+  "skinny"
 ];
 
-// Reflection prompts and coping suggestions
+// NEW: positive / doing-okay path
+const positiveKeywords = [
+  "good",
+  "great",
+  "awesome",
+  "okay",
+  "ok",
+  "fine",
+  "pretty good",
+  "not bad",
+  "happy",
+  "excited",
+  "better"
+];
+
+// --- Response templates ---
+
 const generalReflections = [
   "If you were talking to a close friend feeling the way you do, what would you say to them?",
   "What is one small thing that went okay today, even if the day felt rough overall?",
@@ -117,7 +140,15 @@ const copingIdeas = [
   "Is there a comforting routine (music, tea, a favorite show, a game) you can lean on for a little while?"
 ];
 
-// Crisis response text
+const positiveResponses = [
+  "I’m really glad to hear that. 😊",
+  "That’s nice to hear. It sounds like you’re in a pretty okay place right now.",
+  "Love that—sometimes “great” is all we need to say.",
+  "That’s awesome. I’m glad things feel good in this moment."
+];
+
+// --- Crisis response text ---
+
 function getCrisisResponse() {
   return `
     I’m really glad you shared that with me. ❤️<br /><br />
@@ -133,14 +164,24 @@ function getCrisisResponse() {
   `;
 }
 
-// Non-crisis supportive response builder
+// --- Non-crisis supportive response builder ---
+
 function buildSupportiveResponse(text) {
   const lower = text.toLowerCase();
   let responseParts = [];
 
-  // Basic validation / acknowledgment
+  // ✅ POSITIVE PATH (e.g., "Great!", "I'm good", "Pretty happy")
+  if (positiveKeywords.some((k) => lower.includes(k))) {
+    responseParts.push(randomFromArray(positiveResponses));
+    responseParts.push(
+      "If you feel like sharing, what’s something that’s been going well for you lately?"
+    );
+    return responseParts.join("<br /><br />");
+  }
+
+  // ✅ Default gentle acknowledgement
   responseParts.push(
-    "Thank you for sharing that with me. It sounds like there’s a lot on your mind, and I’m here to sit with you for a moment."
+    "Thanks for sharing that with me. I’m here with you."
   );
 
   // Topic-specific pieces
@@ -175,7 +216,7 @@ function buildSupportiveResponse(text) {
     );
   }
 
-  // If nothing specific matched, go more general
+  // If nothing specific matched, stay general but validating
   if (responseParts.length === 1) {
     responseParts.push(
       "Even if it’s hard to put into words, what you’re feeling makes sense in the context of everything you’re juggling."
@@ -188,20 +229,29 @@ function buildSupportiveResponse(text) {
 
   // Encourage real-world support
   responseParts.push(
-    "If this feels like more than you want to handle alone, it could be helpful to talk with a trusted person or a professional who can support you more directly."
+    "If this feels like more than you want to handle alone, it could be helpful to talk with someone you trust or a professional who can support you more directly."
   );
 
   return responseParts.join("<br /><br />");
 }
 
+// --- Utility helpers ---
+
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Detect whether text likely contains crisis language
 function isCrisis(text) {
   const lower = text.toLowerCase();
   return crisisKeywords.some((k) => lower.includes(k));
+}
+
+// Simple HTML escape to avoid weirdness
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 // --- Form handler ---
@@ -226,11 +276,3 @@ chatForm.addEventListener("submit", (event) => {
     addMessage("assistant", replyHtml);
   }, 350);
 });
-
-// Simple HTML escape to avoid weirdness
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
