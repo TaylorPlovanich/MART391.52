@@ -17,7 +17,7 @@ function addMessage(role, text) {
 
   const bubble = document.createElement("div");
   bubble.classList.add("message-bubble");
-  bubble.innerHTML = text; // safe enough for this prototype (no user HTML injection)
+  bubble.innerHTML = text; // ok for this prototype (we escape user input)
 
   wrapper.appendChild(meta);
   wrapper.appendChild(bubble);
@@ -28,7 +28,7 @@ function addMessage(role, text) {
 
 // --- Keyword groups ---
 
-// Crisis keywords to watch for (very simple)
+// Crisis keywords (very simple, not exhaustive)
 const crisisKeywords = [
   "suicide",
   "kill myself",
@@ -99,7 +99,7 @@ const bodyKeywords = [
   "skinny"
 ];
 
-// NEW: positive / doing-okay path
+// Positive / “doing okay” path
 const positiveKeywords = [
   "good",
   "great",
@@ -111,7 +111,10 @@ const positiveKeywords = [
   "not bad",
   "happy",
   "excited",
-  "better"
+  "better",
+  "everything",
+  "all good",
+  "doing well"
 ];
 
 // --- Response templates ---
@@ -142,9 +145,9 @@ const copingIdeas = [
 
 const positiveResponses = [
   "I’m really glad to hear that. 😊",
-  "That’s nice to hear. It sounds like you’re in a pretty okay place right now.",
-  "Love that—sometimes “great” is all we need to say.",
-  "That’s awesome. I’m glad things feel good in this moment."
+  "That’s nice to hear. It sounds like you’re in a pretty solid place right now.",
+  "Love that—sometimes “great” or “everything’s good” is exactly enough.",
+  "It sounds like a lot of things are going well overall. That’s really good to notice."
 ];
 
 // --- Crisis response text ---
@@ -170,19 +173,17 @@ function buildSupportiveResponse(text) {
   const lower = text.toLowerCase();
   let responseParts = [];
 
-  // ✅ POSITIVE PATH (e.g., "Great!", "I'm good", "Pretty happy")
+  // ✅ Positive path (e.g., "I'm feeling great", "everything", "all good")
   if (positiveKeywords.some((k) => lower.includes(k))) {
     responseParts.push(randomFromArray(positiveResponses));
     responseParts.push(
-      "If you feel like sharing, what’s something that’s been going well for you lately?"
+      "If you feel like sharing, what’s something that’s been going well for you lately, or something you’re looking forward to?"
     );
     return responseParts.join("<br /><br />");
   }
 
   // ✅ Default gentle acknowledgement
-  responseParts.push(
-    "Thanks for sharing that with me. I’m here with you."
-  );
+  responseParts.push("Thanks for sharing that with me. I’m here with you.");
 
   // Topic-specific pieces
   if (anxietyKeywords.some((k) => lower.includes(k))) {
@@ -216,20 +217,20 @@ function buildSupportiveResponse(text) {
     );
   }
 
-  // If nothing specific matched, stay general but validating
+  // If nothing specific matched, keep it light but validating
   if (responseParts.length === 1) {
     responseParts.push(
-      "Even if it’s hard to put into words, what you’re feeling makes sense in the context of everything you’re juggling."
+      "Even if it’s hard to put everything into words, it’s okay to be exactly where you are right now."
     );
   }
 
-  // Always add a reflection prompt + coping idea
+  // Reflection + coping idea
   responseParts.push(randomFromArray(generalReflections));
   responseParts.push(randomFromArray(copingIdeas));
 
-  // Encourage real-world support
+  // Encourage real-world support (without assuming crisis)
   responseParts.push(
-    "If this feels like more than you want to handle alone, it could be helpful to talk with someone you trust or a professional who can support you more directly."
+    "If you ever feel like this is more than you want to hold by yourself, it can really help to reach out to someone you trust or a professional who can support you more directly."
   );
 
   return responseParts.join("<br /><br />");
@@ -246,7 +247,7 @@ function isCrisis(text) {
   return crisisKeywords.some((k) => lower.includes(k));
 }
 
-// Simple HTML escape to avoid weirdness
+// Escape user text so they can’t inject HTML
 function escapeHtml(str) {
   return str
     .replace(/&/g, "&amp;")
@@ -265,7 +266,7 @@ chatForm.addEventListener("submit", (event) => {
   addMessage("user", escapeHtml(value));
   userInput.value = "";
 
-  // Simulate a tiny delay (optional)
+  // Simulate a tiny delay
   setTimeout(() => {
     let replyHtml;
     if (isCrisis(value)) {
