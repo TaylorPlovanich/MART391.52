@@ -99,6 +99,45 @@ const bodyKeywords = [
   "skinny"
 ];
 
+// Modes: goals, gratitude, creative planning
+const goalsKeywords = [
+  "goal",
+  "goals",
+  "habit",
+  "habits",
+  "plan",
+  "plans",
+  "routine",
+  "project",
+  "projects",
+  "focus on"
+];
+
+const gratitudeKeywords = [
+  "grateful",
+  "gratitude",
+  "thankful",
+  "appreciate",
+  "appreciation",
+  "blessed",
+  "thank you"
+];
+
+const creativeKeywords = [
+  "creative",
+  "creativity",
+  "idea",
+  "ideas",
+  "brainstorm",
+  "art",
+  "draw",
+  "write",
+  "story",
+  "design",
+  "make something",
+  "project idea"
+];
+
 // Positive / “doing okay” words/phrases (used inside isPositiveMood)
 const positiveKeywords = [
   "good",
@@ -150,10 +189,49 @@ const positiveResponses = [
   "It sounds like a lot of things are going well overall. That’s really good to notice."
 ];
 
+// New: richer follow-ups when things are going well
+const followUpPositiveResponses = [
+  "That’s really good to hear. It sounds like things are lining up nicely for you right now.",
+  "Love that. It’s nice when everything starts clicking into place.",
+  "That kind of momentum feels good. Definitely worth noticing.",
+  "That’s awesome. It sounds like you’re in a pretty steady place."
+];
+
+const forwardLookingPrompts = [
+  "Is there anything coming up that you’re especially excited about?",
+  "What’s one thing you’re looking forward to next?",
+  "Do you want to use this good energy to move something small forward?",
+  "Is there a goal you’re quietly excited about right now?",
+  "Anything fun or meaningful planned in the near future?"
+];
+
+// Mode templates: goals, gratitude, creative planning
+
+const goalsModePrompts = [
+  "If you want, we can shrink a goal down into something tiny and doable. What is one small thing you would like to make progress on?",
+  "Think of one area of your life you would like to nudge forward a little. What comes to mind first?",
+  "If you picked a goal just for this week, what would it be?",
+  "Sometimes it helps to pick a 'very small next step' instead of a big goal. What could that look like for you?"
+];
+
+const gratitudeModePrompts = [
+  "Let’s do a quick gratitude check in. What is one thing you feel grateful for right now, no matter how small?",
+  "You can try naming three tiny things you appreciate in this moment. They can be as simple as a warm drink or a song you like.",
+  "Sometimes it helps to notice one person, one place, and one small comfort you appreciate today.",
+  "If it feels okay, what is something about yourself that you are glad exists?"
+];
+
+const creativePlanningPrompts = [
+  "Want to use this good energy for something creative? What kind of project or idea have you been thinking about lately?",
+  "If you had an hour just to create something, what would you want to work on?",
+  "Think about a simple creative experiment you could try this week. What is the first idea that pops up?",
+  "Is there a small creative project you have been postponing that you would like to bring back to life?"
+];
+
 // --- Positive mood detector (improved) ---
 
 function isPositiveMood(lower) {
-  // Phrases that should *not* be treated as positive, even if they contain positive words
+  // Phrases that should not be treated as positive, even if they contain positive words
   const negativePatterns = [
     "not good",
     "not great",
@@ -225,12 +303,42 @@ function buildSupportiveResponse(text) {
   const lower = text.toLowerCase();
   let responseParts = [];
 
+  const mentionsGoals = goalsKeywords.some((k) => lower.includes(k));
+  const mentionsGratitude = gratitudeKeywords.some((k) => lower.includes(k));
+  const mentionsCreative = creativeKeywords.some((k) => lower.includes(k));
+
   // ✅ Positive path (e.g., "I'm feeling great", "I'm doing well", "everything is good")
   if (isPositiveMood(lower)) {
     responseParts.push(randomFromArray(positiveResponses));
-    responseParts.push(
-      "If you feel like sharing, what’s something that’s been going well for you lately, or something you’re looking forward to?"
-    );
+
+    // If they are already talking about goals, gratitude, or creativity while feeling good
+    if (mentionsGoals) {
+      responseParts.push(randomFromArray(goalsModePrompts));
+    } else if (mentionsGratitude) {
+      responseParts.push(randomFromArray(gratitudeModePrompts));
+    } else if (mentionsCreative) {
+      responseParts.push(randomFromArray(creativePlanningPrompts));
+    } else {
+      // Second level positive replies like "everything is going well"
+      if (
+        lower.includes("everything") ||
+        lower.includes("all") ||
+        lower.includes("really good") ||
+        lower.includes("great") ||
+        lower.includes("amazing")
+      ) {
+        responseParts.push(randomFromArray(followUpPositiveResponses));
+        responseParts.push(randomFromArray(forwardLookingPrompts));
+      } else {
+        responseParts.push(
+          "If you feel like sharing, what’s something that’s been going well for you lately, or something you’re looking forward to?"
+        );
+        responseParts.push(
+          "If you ever want to switch gears, you can also say something like 'goals', 'gratitude', or 'creative ideas' and we can lean into that."
+        );
+      }
+    }
+
     return responseParts.join("<br /><br />");
   }
 
@@ -267,6 +375,19 @@ function buildSupportiveResponse(text) {
     responseParts.push(
       "Thoughts about our bodies can get really loud and harsh. Your worth isn’t defined by how you look, and you deserve kindness from yourself as much as anyone else."
     );
+  }
+
+  // Modes can still show up even if mood is mixed
+  if (mentionsGoals) {
+    responseParts.push(randomFromArray(goalsModePrompts));
+  }
+
+  if (mentionsGratitude) {
+    responseParts.push(randomFromArray(gratitudeModePrompts));
+  }
+
+  if (mentionsCreative) {
+    responseParts.push(randomFromArray(creativePlanningPrompts));
   }
 
   // If nothing specific matched, keep it light but validating
